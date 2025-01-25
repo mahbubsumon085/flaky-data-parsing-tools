@@ -30,7 +30,7 @@ for ((i=0; i<iterations; i++)); do
         f=$(find . -name "TEST-${g}.xml" -not -path "*target/surefire-reports/junitreports/*")
         fcount=$(echo "$f" | wc -l)
         if [[ "$fcount" == "1" ]]; then
-            python "$dir_to_python_script"/python-scripts/parse_surefire_report.py "$f" "$i" "$full_test_name" >> rounds-test-results.csv
+            python "$dir_to_python_script"/scripts/parse_surefire_report.py "$f" "$i" "$full_test_name" >> rounds-test-results.csv
             break
         else
             echo "================ ERROR finding TEST-${g}.xml: $fcount:"

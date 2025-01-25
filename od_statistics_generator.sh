@@ -35,7 +35,7 @@ for ((i=0; i<iterations; i++)); do
         fcount=$(echo "$f" | wc -l)
         if [[ "$fcount" == "1" ]]; then
             # Parse the Surefire report
-            python python-scripts/parse_surefire_report.py "$f" "$i" "$dependenttest" >> rounds-test-results1.csv
+            python scripts/parse_surefire_report.py "$f" "$i" "$dependenttest" >> rounds-test-results1.csv
             break
         else
             echo "================ ERROR finding TEST-${g}.xml: $fcount:"
