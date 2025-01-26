@@ -1,6 +1,6 @@
 # Project Test Automation and Statistics Generator
 
-This repository primarily contains Python and Bash scripts for parsing and generating statistics for flaky unit tests across multiple iterations. It supports various flaky test types, including order-dependent (OD), time-dependent (TD), input-dependent (ID), and more.  
+This repository primarily contains Python and Bash scripts for parsing and generating statistics for flaky unit tests across multiple iterations. It supports various flaky test types, including order-dependent (OD), time-dependent (TD), implementation-dependent (ID), and more.  
 
 The scripts are adapted from the [Azure Tools repository](https://github.com/winglam/azure-tools) to extend functionality for diverse flaky test scenarios and provide enhanced automation and analysis.
 
@@ -25,7 +25,6 @@ The following are the key files for test analysis and in generating statistics:
   - Builds the Maven project with necessary options while skipping unnecessary checks.
   - Executes the specified tests (`precedingtest` and `flakytest`) in the desired order for a given number of iterations (default: 100).
   - Uses the `parse_surefire_report.py` script to process Surefire XML reports and extract detailed results for the flaky test.
-  - Filters and retains results specific to the flaky test.
   - Organizes logs, test results, and summaries into structured directories (`flaky-result`).
   - Outputs a summary of test passes, failures, and errors to `flaky-result/summary.txt`.
 
