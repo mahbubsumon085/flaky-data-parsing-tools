@@ -3,12 +3,12 @@
 # Assign parameters to variables
 module=$1
 precedingtest=$2
-dependenttest=$3
+flakytest=$3
 iterations=${4:-100} # Default to 100 iterations if not provided
 
 MVNOPTIONS="-Ddependency-check.skip=true -Dgpg.skip=true -DfailIfNoTests=false -Dskip.installnodenpm -Dskip.npm -Dskip.yarn -Dlicense.skip -Dcheckstyle.skip -Drat.skip -Denforcer.skip -Danimal.sniffer.skip -Dmaven.javadoc.skip -Dfindbugs.skip -Dwarbucks.skip -Dmodernizer.skip -Dimpsort.skip -Dmdep.analyze.skip -Dpgpverify.skip -Dxml.skip -Dcobertura.skip=true -Dfindbugs.skip=true"
 
-echo "Parameters: module=$module, precedingtest=$precedingtest, dependenttest=$dependenttest, iterations=$iterations"
+echo "Parameters: module=$module, precedingtest=$precedingtest, flakytest=$flakytest, iterations=$iterations"
 
 # Maven build step
 mvn clean install -DskipTests -pl "$module" -am $MVNOPTIONS || { echo "Error: Maven install failed."; exit 1; }
@@ -24,7 +24,7 @@ for ((i=0; i<iterations; i++)); do
     set -x
 
     # Run the tests in specified order, including both tests
-    mvn -pl "$module" test -Dsurefire.runOrder=testorder -Dtest="$precedingtest,$dependenttest" $MVNOPTIONS |& tee mvn-test-$i.log
+    mvn -pl "$module" test -Dsurefire.runOrder=testorder -Dtest="$precedingtest,$flakytest" $MVNOPTIONS |& tee mvn-test-$i.log
     
     # Strip ANSI escape codes and process the log
     sed -r "s/\x1B\[[0-9;]*[a-zA-Z]//g" mvn-test-$i.log | \
@@ -35,7 +35,7 @@ for ((i=0; i<iterations; i++)); do
         fcount=$(echo "$f" | wc -l)
         if [[ "$fcount" == "1" ]]; then
             # Parse the Surefire report
-            python scripts/parse_surefire_report.py "$f" "$i" "$dependenttest" >> rounds-test-results1.csv
+            python scripts/parse_surefire_report.py "$f" "$i" "$flakytest" >> rounds-test-results1.csv
             break
         else
             echo "================ ERROR finding TEST-${g}.xml: $fcount:"
@@ -60,19 +60,19 @@ for ((i=0; i<iterations; i++)); do
     cp -r "$module/target/surefire-reports" "flaky-result/surefire-reports/reports-$i"
 done
 
-# Replace '#' with '.' in dependenttest
-formatted_dependenttest="${dependenttest//#/.}"
+# Replace '#' with '.' in flakytest
+formatted_flakytest="${flakytest//#/.}"
 
-# Debugging: Output the modified dependenttest
-echo "Formatted dependent test: '$formatted_dependenttest'"
+# Debugging: Output the modified flakytest
+echo "Formatted flakytest test: '$formatted_flakytest'"
 
-# Filter to keep only rows with the correctly formatted dependent test
-awk -v dependent="$formatted_dependenttest" -F, '$0 ~ dependent { print $0 }' rounds-test-results1.csv > rounds-test-results.tmp
+# Filter to keep only rows with the correctly formatted test
+awk -v dependent="$formatted_flakytest" -F, '$0 ~ dependent { print $0 }' rounds-test-results1.csv > rounds-test-results.tmp
 
 if [[ -s rounds-test-results.tmp ]]; then
     mv rounds-test-results.tmp rounds-test-results.csv
 else
-    echo "No matching rows found for dependent test: '$formatted_dependenttest'"
+    echo "No matching rows found for dependent test: '$formatted_flakytest'"
     rm rounds-test-results.tmp # Remove the temporary file if it's empty
 fi
 
